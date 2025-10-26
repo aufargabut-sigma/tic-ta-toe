@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe - Versi Skor</title>
+  <style>
+    body {
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+    }
+
+    #scoreboard {
+      display: flex;
+      gap: 40px;
+      font-size: 1.2em;
+      margin-bottom: 10px;
+    }
+
+    #scoreboard span {
+      background: rgba(255,255,255,0.2);
+      padding: 8px 15px;
+      border-radius: 10px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background-color: rgba(255,255,255,0.15);
+      border: 2px solid white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .cell:hover {
+      background-color: rgba(255,255,255,0.3);
+      transform: scale(1.05);
+    }
+
+    #status {
+      margin: 15px 0;
+      font-size: 1.2em;
+    }
+
+    select, button {
+      background: white;
+      color: #0072ff;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 8px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: 0.3s;
+      margin: 5px;
+    }
+
+    select:hover, button:hover {
+      background: #0072ff;
+      color: white;
+      transform: scale(1.05);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      opacity: 0.7;
+      font-size: 0.9em;
+    }
+
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe buatan aufar ganteng</h1>
+ 
+
+  <div id="scoreboard">
+    <span>👤 Kamu: <b id="playerScore">0</b></span>
+    <span>💻 AI: <b id="aiScore">0</b></span>
+  </div>
+<p>papan score diata berfungsi untuk menghitung score siapa duluan mencapai score 10 dia menang! selamat bermain</p>
+  <div>
+    <label for="difficulty">Kesulitan:</label>
+    <select id="difficulty" onchange="resetRound()">
+      <option value="easy">Mudah</option>
+      <option value="medium" selected>Sedang</option>
+      <option value="hard">Susah</option>
+    </select>
+  </div>
+
+  <div id="status">Giliran Kamu (X)</div>
+
+  <div class="board" id="board">
+    <div class="cell" onclick="playerMove(0)"></div>
+    <div class="cell" onclick="playerMove(1)"></div>
+    <div class="cell" onclick="playerMove(2)"></div>
+    <div class="cell" onclick="playerMove(3)"></div>
+    <div class="cell" onclick="playerMove(4)"></div>
+    <div class="cell" onclick="playerMove(5)"></div>
+    <div class="cell" onclick="playerMove(6)"></div>
+    <div class="cell" onclick="playerMove(7)"></div>
+    <div class="cell" onclick="playerMove(8)"></div>
+  </div>
+
+  <button onclick="resetRound()">Ulangi Ronde</button>
+
+  
+
+  <script>
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let gameActive = true;
+    const player = "X";
+    const ai = "O";
+    let playerScore = 0;
+    let aiScore = 0;
+
+    function playerMove(index) {
+      if (!gameActive || board[index] !== "") return;
+      board[index] = player;
+      updateBoard();
+
+      if (checkWinner(player)) {
+        document.getElementById("status").textContent = "🎉 Kamu Menang Ronde!";
+        playerScore++;
+        updateScore();
+        checkChampion();
+        gameActive = false;
+        return;
+      }
+
+      if (isDraw()) {
+        document.getElementById("status").textContent = "😅 Seri!";
+        gameActive = false;
+        return;
+      }
+
+      document.getElementById("status").textContent = "Giliran Komputer...";
+      setTimeout(aiMove, 500);
+    }
+
+    function aiMove() {
+      if (!gameActive) return;
+      const level = document.getElementById("difficulty").value;
+      let move;
+
+      if (level === "easy") move = randomMove();
+      else if (level === "medium") move = mediumMove();
+      else move = bestMove();
+
+      board[move] = ai;
+      updateBoard();
+
+      if (checkWinner(ai)) {
+        document.getElementById("status").textContent = "💻 Komputer Menang Ronde!";
+        aiScore++;
+        updateScore();
+        checkChampion();
+        gameActive = false;
+        return;
+      }
+
+      if (isDraw()) {
+        document.getElementById("status").textContent = "😅 Seri!";
+        gameActive = false;
+        return;
+      }
+
+      document.getElementById("status").textContent = "Giliran Kamu (X atau Pemain)";
+    }
+
+    function randomMove() {
+      const empty = board.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+      return empty[Math.floor(Math.random() * empty.length)];
+    }
+
+    function mediumMove() {
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === "") {
+          board[i] = ai;
+          if (checkWinner(ai)) { board[i] = ""; return i; }
+          board[i] = "";
+        }
+      }
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === "") {
+          board[i] = player;
+          if (checkWinner(player)) { board[i] = ""; return i; }
+          board[i] = "";
+        }
+      }
+      if (board[4] === "") return 4;
+      return randomMove();
+    }
+
+    function bestMove() {
+      let bestScore = -Infinity;
+      let move;
+      for (let i = 0; i < 9; i++) {
+        if (board[i] === "") {
+          board[i] = ai;
+          let score = minimax(board, 0, false);
+          board[i] = "";
+          if (score > bestScore) {
+            bestScore = score;
+            move = i;
+          }
+        }
+      }
+      return move;
+    }
+
+    const scores = { X: -1, O: 1, draw: 0 };
+
+    function minimax(boardState, depth, isMaximizing) {
+      if (checkWinner(ai)) return scores.O;
+      if (checkWinner(player)) return scores.X;
+      if (isDraw()) return scores.draw;
+
+      if (isMaximizing) {
+        let best = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (boardState[i] === "") {
+            boardState[i] = ai;
+            best = Math.max(best, minimax(boardState, depth + 1, false));
+            boardState[i] = "";
+          }
+        }
+        return best;
+      } else {
+        let best = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (boardState[i] === "") {
+            boardState[i] = player;
+            best = Math.min(best, minimax(boardState, depth + 1, true));
+            boardState[i] = "";
+          }
+        }
+        return best;
+      }
+    }
+
+    function checkWinner(symbol) {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      return wins.some(p => p.every(i => board[i] === symbol));
+    }
+
+    function isDraw() {
+      return board.every(cell => cell !== "");
+    }
+
+    function updateBoard() {
+      document.querySelectorAll(".cell").forEach((c, i) => c.textContent = board[i]);
+    }
+
+    function updateScore() {
+      document.getElementById("playerScore").textContent = playerScore;
+      document.getElementById("aiScore").textContent = aiScore;
+    }
+
+    function checkChampion() {
+      if (playerScore >= 10) {
+        alert("🏆 Kamu Juara! Skor: " + playerScore + " - " + aiScore);
+        fullReset();
+      } else if (aiScore >= 10) {
+        alert("💻 Komputer Juara! Skor: " + aiScore + " - " + playerScore);
+        fullReset();
+      }
+    }
+
+    function resetRound() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      gameActive = true;
+      document.getElementById("status").textContent = "Giliran Kamu (X)";
+      updateBoard();
+    }
+
+    function fullReset() {
+      playerScore = 0;
+      aiScore = 0;
+      updateScore();
+      resetRound();
+    }
+  </script>
+</body>
+</html>
