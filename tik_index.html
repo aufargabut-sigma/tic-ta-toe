@@ -157,7 +157,7 @@
         return;
       }
 
-      document.getElementById("status").textContent = "Giliran Komputer...";
+      document.getElementById("status").textContent = "Giliran Ai...";
       setTimeout(aiMove, 500);
     }
 
@@ -174,7 +174,7 @@
       updateBoard();
 
       if (checkWinner(ai)) {
-        document.getElementById("status").textContent = "💻 Komputer Menang Ronde!";
+        document.getElementById("status").textContent = "💻 Ai Menang Ronde!";
         aiScore++;
         updateScore();
         checkChampion();
@@ -310,3 +310,4 @@
   </script>
 </body>
 </html>
+
